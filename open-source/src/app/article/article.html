@@ -1,0 +1,28 @@
+<section class="article-container" *ngIf="post; else notFound">
+
+  <h1>{{ post.title }}</h1>
+
+  <h3 *ngIf="post.subtitle">
+    {{ post.subtitle }}
+  </h3>
+
+  <div class="meta">
+    <small>{{ post.created_at | date: 'medium' }}</small>
+    <small *ngIf="post.views_count !== undefined">
+      {{ post.views_count }} views
+    </small>
+  </div>
+
+  <hr />
+
+  <div class="article-content" *ngIf="post.content">
+    <p *ngFor="let paragraph of post.content.split('\n')">
+      {{ paragraph }}
+    </p>
+  </div>
+
+</section>
+
+<ng-template #notFound>
+  <h2>Post not found</h2>
+</ng-template>

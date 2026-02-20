@@ -1,7 +1,7 @@
 :root {
   font-family: Arial, sans-serif;
-  color: #1f2937;
-  background: #f5f7fb;
+  color: #ffffff;
+  --app-bg: #1c1c21;
 }
 
 * {
@@ -10,10 +10,11 @@
 
 body {
   margin: 0;
+  background-color: var(--app-bg);
 }
 
 a {
-  color: #0f4cbd;
+  color: #ab6333;
   text-decoration: none;
 }
 
@@ -26,13 +27,13 @@ a:hover {
   justify-content: space-between;
   align-items: center;
   padding: 12px 16px;
-  background: #fff;
+  background: var(--app-bg);
   border-bottom: 1px solid #e5e7eb;
 }
 
 .brand {
   font-weight: 700;
-  color: #111827;
+  color: #ffffff;
 }
 
 .nav {
@@ -45,25 +46,6 @@ a:hover {
   max-width: 700px;
   margin: 0 auto;
   padding: 16px;
-}
-
-.card {
-  background: #fff;
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
-  padding: 12px;
-  margin-bottom: 12px;
-}
-
-.post p {
-  margin: 8px 0;
-  white-space: pre-wrap;
-}
-
-.post-head {
-  display: flex;
-  justify-content: space-between;
-  gap: 8px;
 }
 
 .username {
@@ -102,4 +84,37 @@ label {
 
 .error {
   color: #b42318;
+}
+
+.post-link {
+  text-decoration: none;  
+  color: inherit;         
+  display: block;         
+}
+
+.post-link:hover {
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.post p {
+  margin: 8px 0;
+  white-space: pre-wrap;
+}
+
+.post small {
+ color: #a0a0a1; 
+}
+
+.post h2 {
+  margin: 4px 0 8px 0; /* top 4px, bottom 8px */
+  font-weight: normal;  /* optional */
+}
+
+.card {
+  background: #27272e;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 12px;
 }

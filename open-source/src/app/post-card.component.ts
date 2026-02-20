@@ -8,29 +8,20 @@ import { Post } from './models';
   standalone: true,
   imports: [CommonModule, RouterLink],
   template: `
-    <article class="card post">
-      <div class="post-head">
-        <a
-          *ngIf="post.author?.username; else fallbackUser"
-          [routerLink]="['/u', post.author?.username]"
-          class="username"
-        >
-          {{ post.author?.display_name || post.author?.username }}
-        </a>
-        <ng-template #fallbackUser>
-          <span class="username">User #{{ post.user_id }}</span>
-        </ng-template>
-        <small>{{ post.created_at | date: 'short' }}</small>
-      </div>
+    <a class="post-link" [routerLink]="['/posts', post.id]">
+      <article class="card post">
+        <h2><b>{{ post.title }}</b></h2>
+        <p>{{ post.subtitle }}</p>
 
-      <p>{{ post.content }}</p>
-
-      <div class="row">
-        <small>{{ post.likes_count || 0 }} likes</small>
-      </div>
-    </article>
+        <div class="row">
+          <small>{{ post.created_at | date: 'short' }}</small>
+          <small>{{ post.views_count || 0 }} views</small>
+        </div>
+      </article>
+    </a>
   `
 })
+
 export class PostCardComponent {
   @Input({ required: true }) post!: Post;
 }

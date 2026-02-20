@@ -8,29 +8,29 @@ const MOCK_POSTS: Post[] = [
   {
     id: 1001,
     user_id: 1,
-    content: 'Ship fast, iterate faster. Hackathon mode is ON.',
+    title: 'Edmonton region touted as unique location for federal defence initiative.',
+    subtitle: "Brent Jensen with Edmonton Global joins Alberta Primetime host Michael Higgins to discuss an alliance between his organization and other Edmonton entities aiming to establish the Edmonton region as a defence-related hub.",
     created_at: '2026-02-20T16:05:00Z',
-    likes_count: 12,
-    liked_by_me: false,
-    author: { id: 1, username: 'demo', display_name: 'Demo Dev' }
+    views_count: 12,
+    author: { id: 1, username: 'CTV', display_name: 'CTV News' }
   },
   {
     id: 1002,
     user_id: 2,
-    content: 'Built a Django API + Angular frontend in one afternoon. Coffee carried.',
+    title: 'No residential parking ban expected for Edmonton snow removal.',
+    subtitle: "Deployment of 100 additional contractors combined with lower than anticipated snowfall have helped city clear main roads to regular standard",
     created_at: '2026-02-20T15:10:00Z',
-    likes_count: 27,
-    liked_by_me: false,
-    author: { id: 2, username: 'alice', display_name: 'Alice' }
+    views_count: 27,
+    author: { id: 2, username: 'alice', display_name: 'Edmonton Journal' }
   },
   {
     id: 1003,
     user_id: 3,
-    content: 'If it works in prod, it was always the plan.',
+    title: 'Deployment of 100 additional contractors combined with lower than anticipated snowfall have helped city clear main roads to regular standard.',
+    subtitle:"Televised address comes 1 week before provincial budget",
     created_at: '2026-02-20T14:35:00Z',
-    likes_count: 41,
-    liked_by_me: false,
-    author: { id: 3, username: 'bob', display_name: 'Bob' }
+    views_count: 41,
+    author: { id: 3, username: 'bob', display_name: 'CBC' }
   }
 ];
 
@@ -49,6 +49,7 @@ const MOCK_POSTS: Post[] = [
     </section>
   `
 })
+
 export class TimelineComponent implements OnInit {
   posts: Post[] = [...MOCK_POSTS];
   loading = false;

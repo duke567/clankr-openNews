@@ -8,8 +8,10 @@ export interface Post {
   id: number;
   user_id: number;
   author?: User;
-  content: string;
+  title: string;
+  subtitle?: string;
   created_at: string;
-  likes_count?: number;
-  liked_by_me?: boolean;
+  views_count?: number;
+  content?: string;
+  thumbnail?: string;
 }
