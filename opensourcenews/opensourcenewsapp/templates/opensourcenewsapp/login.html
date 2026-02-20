@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'opensourcenewsapp/styles.css' %}" />
+    <title>Log In</title>
+    <meta charset="UTF-8" />
+  </head>
+
+  <body>
+    <div class="container">
+      <div class="header">
+        <h2>Log In</h2>
+      </div>
+
+      <form class="form" method="POST">
+        {% csrf_token %}
+
+        <div class="form__control">
+          <label>Username</label>
+          <input
+            type="text"
+            name="username"
+            placeholder="Insert your user name..."
+            required
+          />
+        </div>
+        
+        <div class="form__control">
+          <label>Password</label>
+          <input
+            type="password"
+            name="password"
+            placeholder="password..."
+            required
+          />
+        </div>
+
+        {% if form.errors %}
+        <div style="color: tomato">
+          {% for field in form %}
+            {% for error in field.errors %}
+              <p>{{ error }}</p>
+            {% endfor %}
+          {% endfor %}
+
+          {% for error in form.non_field_errors %}
+            <p>{{ error }}</p>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+        <button type="submit">Log In</button>
+      </form>
+    </div>
+  </body>
+</html>
