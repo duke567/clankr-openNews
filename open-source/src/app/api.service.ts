@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Post, User } from './models';
-import { Observable } from 'rxjs';
+import { Observable, switchMap } from 'rxjs';
 
 // Keep '' when frontend and Django API share origin.
 // If API is elsewhere, set e.g. 'https://api.example.com'
@@ -11,12 +11,18 @@ const API_BASE = '';
 export class ApiService {
   constructor(private http: HttpClient) {}
 
-  register(payload: { username: string; email: string; password: string }): Observable<{ user: User }> {
-    return this.http.post<{ user: User }>(`${API_BASE}/api/v1/auth/register`, payload);
+  register(payload: { username: string; password1: string; password2: string }): Observable<{ ok: boolean }> {
+    return this.ensureCsrf().pipe(
+      switchMap(() => this.http.post<{ ok: boolean }>(`${API_BASE}/api/auth/register/`, payload))
+    );
   }
 
-  login(payload: { username: string; password: string }): Observable<{ token: string; user: User }> {
-    return this.http.post<{ token: string; user: User }>(`${API_BASE}/api/v1/auth/login`, payload);
+  login(payload: { username: string; password: string }): Observable<{ ok: boolean; user?: { username: string } }> {
+    return this.ensureCsrf().pipe(
+      switchMap(() =>
+        this.http.post<{ ok: boolean; user?: { username: string } }>(`${API_BASE}/api/auth/login/`, payload)
+      )
+    );
   }
 
   getTimeline(limit = 50): Observable<{ data: Post[] }> {
@@ -39,5 +45,9 @@ export class ApiService {
 
   getUserProfile(username: string): Observable<{ user: User; posts: Post[] }> {
     return this.http.get<{ user: User; posts: Post[] }>(`${API_BASE}/api/v1/users/${username}`);
+  }
+
+  private ensureCsrf(): Observable<string> {
+    return this.http.get(`${API_BASE}/api/auth/csrf/`, { responseType: 'text', withCredentials: true });
   }
 }

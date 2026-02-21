@@ -5,13 +5,15 @@ import { ApiService } from './api.service';
 import { Post, User } from './models';
 import { PostCardComponent } from './post-card.component';
 
+const USE_CONTENT_API = false;
+
 @Component({
   selector: 'app-profile',
   standalone: true,
   imports: [CommonModule, RouterLink, PostCardComponent],
   template: `
     <section>
-      <p><a routerLink="/">← Back to timeline</a></p>
+      <p><a routerLink="/timeline">← Back to timeline</a></p>
 
       <h2 *ngIf="user">{{ user.display_name || user.username }}</h2>
       <p *ngIf="user" class="muted">@{{ user.username }}</p>
@@ -35,7 +37,9 @@ export class ProfileComponent implements OnInit {
     this.route.paramMap.subscribe((params) => {
       const username = params.get('username');
       if (!username) return;
-      this.load(username);
+      this.user = { id: 0, username, display_name: username };
+      this.posts = [];
+      if (USE_CONTENT_API) this.load(username);
     });
   }
 
