@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { HttpErrorResponse } from '@angular/common/http';
 import { Router, RouterLink } from '@angular/router';
 import { ApiService } from './api.service';
 
@@ -18,26 +19,26 @@ import { ApiService } from './api.service';
       </label>
 
       <label>
-        Email
-        <input name="email" type="email" [(ngModel)]="email" required />
+        Password
+        <input name="password1" type="password" [(ngModel)]="password1" required minlength="6" />
       </label>
 
       <label>
-        Password
-        <input name="password" type="password" [(ngModel)]="password" required minlength="6" />
+        Confirm Password
+        <input name="password2" type="password" [(ngModel)]="password2" required minlength="6" />
       </label>
 
       <button type="submit" [disabled]="f.invalid || loading">Create account</button>
       <p class="error" *ngIf="error">{{ error }}</p>
     </form>
 
-    <p>Already have an account? <a routerLink="/login">Login</a>.</p>
+    <p>Already have an account? <a routerLink="/auth/login">Login</a>.</p>
   `
 })
 export class RegisterComponent {
   username = '';
-  email = '';
-  password = '';
+  password1 = '';
+  password2 = '';
   loading = false;
   error = '';
 
@@ -45,12 +46,27 @@ export class RegisterComponent {
 
   submit(): void {
     this.error = '';
+    if (this.password1 !== this.password2) {
+      this.error = 'Passwords do not match.';
+      return;
+    }
     this.loading = true;
 
-    this.api.register({ username: this.username, email: this.email, password: this.password }).subscribe({
-      next: () => this.router.navigateByUrl('/login'),
-      error: () => {
-        this.error = 'Registration failed.';
+    this.api.register({ username: this.username, password1: this.password1, password2: this.password2 }).subscribe({
+      next: (res) => {
+        if (!res.ok) {
+          this.error = 'Registration failed.';
+          return;
+        }
+        this.router.navigateByUrl('/auth/login');
+      },
+      error: (err: HttpErrorResponse) => {
+        const backendMessage = err.error?.message;
+        const details =
+          err.error?.errors?.username?.[0] ||
+          err.error?.errors?.password2?.[0] ||
+          err.error?.errors?.password1?.[0];
+        this.error = backendMessage || details || 'Registration failed.';
         this.loading = false;
       },
       complete: () => {
