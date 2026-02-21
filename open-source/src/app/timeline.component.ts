@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ApiService } from './api.service';
 import { Post } from './models';
 import { PostCardComponent } from './post-card.component';
+import { SpotlightComponent } from './spotlight.component';
 
 const MOCK_POSTS: Post[] = [
   {
@@ -37,16 +38,25 @@ const MOCK_POSTS: Post[] = [
 @Component({
   selector: 'app-timeline',
   standalone: true,
-  imports: [CommonModule, PostCardComponent],
+  imports: [CommonModule, PostCardComponent, SpotlightComponent],
   template: `
-    <section>
-      <h2>Timeline</h2>
+    <div class="row">
+      <!-- Spotlight: first post only -->
+      <section class="section" *ngIf="posts.length">
+        <h2>Spotlight</h2>
+        <app-spotlight [post]="posts[0]"></app-spotlight>
+      </section>
 
-      <p *ngIf="loading">Loading timeline...</p>
-      <p class="error" *ngIf="error">{{ error }}</p>
+      <section class="section timeline">
+        <h2>Happening Now</h2>
+        <hr/>
 
-      <app-post-card *ngFor="let post of posts" [post]="post"></app-post-card>
-    </section>
+        <p *ngIf="loading">Loading timeline...</p>
+        <p class="error" *ngIf="error">{{ Sorry! We can't fetch timeline right now. }}</p>
+
+        <app-post-card *ngFor="let post of posts" [post]="post"></app-post-card>
+      </section>
+    </div>
   `
 })
 

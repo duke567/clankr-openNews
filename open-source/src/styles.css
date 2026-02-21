@@ -43,7 +43,7 @@ a:hover {
 }
 
 .container {
-  max-width: 700px;
+  max-width: 85%;
   margin: 0 auto;
   padding: 16px;
 }
@@ -56,7 +56,7 @@ a:hover {
 .row {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   gap: 8px;
 }
 
@@ -117,4 +117,33 @@ label {
   border-radius: 10px;
   padding: 12px;
   margin-bottom: 12px;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  background: #42424c;
+}
+
+.section {
+  max-width: 40%;
+}
+
+.section timeline {
+  overflow: hidden;
+  overflow-y: auto;
+  max-height: 80%;
+  padding-right: 8px;
+}
+
+.section.timeline::-webkit-scrollbar {
+  width: 8px;
+}
+
+.section.timeline::-webkit-scrollbar-thumb {
+  background-color: #888;
+  border-radius: 4px;
+}
+
+.section.timeline::-webkit-scrollbar-thumb:hover {
+  background-color: #555;
 }
