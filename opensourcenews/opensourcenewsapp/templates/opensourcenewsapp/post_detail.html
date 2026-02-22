@@ -1,0 +1,53 @@
+{% extends 'opensourcenewsapp/base.html' %}
+
+{% block title %}{{ post.title|default:'Post' }} | OpenNews{% endblock %}
+
+{% block content %}
+<p><a class="link-cta" href="{% url 'timeline_page' %}">Back to timeline</a></p>
+
+<article class="card post-card">
+  <h1>{{ post.title|default:'Untitled summary' }}</h1>
+  {% if post.subtitle %}<p class="subtitle">{{ post.subtitle }}</p>{% endif %}
+  {% if post.media %}<img class="post-media" src="{{ post.media }}" alt="Post media" />{% endif %}
+  <p>{{ post.article }}</p>
+  <form method="post" action="{% url 'delete_post_summary' post.id %}" class="inline-form" onsubmit="return confirm('Delete this summary?');">
+    {% csrf_token %}
+    <button type="submit" class="btn-soft btn-danger">Delete summary</button>
+  </form>
+</article>
+
+<section class="card">
+  <div class="section-head">
+    <h2>Source tweets</h2>
+    <p class="muted">Included: {{ included_count }} / {{ tweets|length }}</p>
+  </div>
+
+  {% if notice %}<p class="ok-box">{{ notice }}</p>{% endif %}
+  {% if error %}<div class="error-box"><p>{{ error }}</p></div>{% endif %}
+
+  {% if tweets %}
+  <form method="post">
+    {% csrf_token %}
+    <div class="stack">
+      {% for tw in tweets %}
+      <label class="tweet-row {% if tw.excluded %}tweet-row--excluded{% endif %}">
+        <input type="checkbox" name="remove_ids" value="{{ tw.id }}" {% if tw.excluded %}disabled{% endif %} />
+        <div>
+          <p><strong>{{ tw.raw.author|default:'Unknown' }}</strong></p>
+          <p>{{ tw.raw.text|default:'(empty)' }}</p>
+          {% if tw.raw.time %}<p class="muted">{{ tw.raw.time }}</p>{% endif %}
+          {% if tw.excluded %}<p class="muted">Already excluded</p>{% endif %}
+        </div>
+      </label>
+      {% endfor %}
+    </div>
+    <div class="actions-row">
+      <button type="submit" name="action" value="remove" class="btn-soft">Remove selected tweets</button>
+      <button type="submit" name="action" value="regenerate" class="btn-primary">Remove selected and regenerate summary</button>
+    </div>
+  </form>
+  {% else %}
+  <p>No source tweets attached to this summary yet.</p>
+  {% endif %}
+</section>
+{% endblock %}

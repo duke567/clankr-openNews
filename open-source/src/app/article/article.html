@@ -1,28 +1,55 @@
-<section class="article-container" *ngIf="post; else notFound">
-
+<section class="article-container" *ngIf="post; else stateTemplate">
   <h1>{{ post.title }}</h1>
-
-  <h3 *ngIf="post.subtitle">
-    {{ post.subtitle }}
-  </h3>
+  <h3 *ngIf="post.subtitle">{{ post.subtitle }}</h3>
 
   <div class="meta">
     <small>{{ post.created_at | date: 'medium' }}</small>
-    <small *ngIf="post.views_count !== undefined">
-      {{ post.views_count }} views
-    </small>
+    <small *ngIf="post.views_count !== undefined">{{ post.views_count }} views</small>
   </div>
 
   <hr />
 
   <div class="article-content" *ngIf="post.content">
-    <p *ngFor="let paragraph of post.content.split('\n')">
-      {{ paragraph }}
-    </p>
+    <p *ngFor="let paragraph of post.content.split('\n')">{{ paragraph }}</p>
   </div>
 
+  <hr />
+
+  <div class="tweet-controls">
+    <h3>Source Tweets</h3>
+    <button type="button" (click)="regenerateSummary()" [disabled]="selectedTweetIds.size === 0 || regenerating">
+      {{ regenerating ? 'Regenerating...' : 'Regenerate Summary' }}
+    </button>
+  </div>
+  <p class="muted" *ngIf="tweets.length">Select tweets to remove, then regenerate.</p>
+  <p class="error" *ngIf="regenError">{{ regenError }}</p>
+
+  <div *ngIf="tweets.length === 0" class="muted">No source tweets stored for this post yet.</div>
+
+  <div class="tweet-list">
+    <label class="tweet-item" *ngFor="let tw of tweets">
+      <input
+        type="checkbox"
+        [checked]="selectedTweetIds.has(tw.id)"
+        [disabled]="tw.excluded || regenerating"
+        (change)="toggleTweetSelection(tw.id, $any($event.target).checked)"
+      />
+      <div>
+        <div class="tweet-head">
+          <strong>{{ tw.author || 'Unknown' }}</strong>
+          <small>{{ tw.time }}</small>
+          <small *ngIf="tw.excluded">(already excluded)</small>
+        </div>
+        <p>{{ tw.text }}</p>
+        <small>
+          ❤ {{ tw.metrics?.lk || 0 }} · 🔁 {{ tw.metrics?.rt || 0 }} · 💬 {{ tw.metrics?.rp || 0 }}
+        </small>
+      </div>
+    </label>
+  </div>
 </section>
 
-<ng-template #notFound>
-  <h2>Post not found</h2>
+<ng-template #stateTemplate>
+  <h2 *ngIf="loading">Loading post...</h2>
+  <h2 *ngIf="!loading">Post not found</h2>
 </ng-template>

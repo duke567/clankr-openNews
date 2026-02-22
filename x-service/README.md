@@ -31,3 +31,17 @@ Scrapes for recent tweets.
 ```
 http://127.0.0.1:8000/x/recent-search?query=AI&min_faves=100
 ```
+
+### POST /x/scrape-and-ingest
+
+Scrapes tweets and immediately sends the payload to Django `api/ingest-scrape/`.
+
+Environment variable:
+
+* `DJANGO_INGEST_URL` (optional) default: `http://127.0.0.1:8000/api/ingest-scrape/`
+
+Example:
+
+```
+http://127.0.0.1:8000/x/scrape-and-ingest?query=AI&min_faves=100&no_cache=true
+```

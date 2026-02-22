@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Post, User } from './models';
+import { Post, SourceTweet, User } from './models';
 import { Observable, switchMap } from 'rxjs';
 
 // Keep '' when frontend and Django API share origin.
@@ -27,7 +27,21 @@ export class ApiService {
 
   getTimeline(limit = 50): Observable<{ data: Post[] }> {
     return this.http.get<{ data: Post[] }>(`${API_BASE}/api/v1/posts/timeline`, {
-      params: { limit }
+      params: { limit, t: Date.now() }
+    });
+  }
+
+  getPostById(postId: number): Observable<Post> {
+    return this.http.get<Post>(`${API_BASE}/api/v1/posts/${postId}`);
+  }
+
+  getPostTweets(postId: number): Observable<{ data: SourceTweet[] }> {
+    return this.http.get<{ data: SourceTweet[] }>(`${API_BASE}/api/v1/posts/${postId}/tweets`);
+  }
+
+  regeneratePost(postId: number, removeIds: number[]): Observable<{ post: Post; tweets: SourceTweet[] }> {
+    return this.http.post<{ post: Post; tweets: SourceTweet[] }>(`${API_BASE}/api/v1/posts/${postId}/regenerate`, {
+      remove_ids: removeIds
     });
   }
 

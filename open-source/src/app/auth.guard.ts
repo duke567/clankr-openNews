@@ -1,18 +1,28 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { AuthService } from './auth.service';
-import { map } from 'rxjs';
+import { catchError, map, of } from 'rxjs';
 
 export const authGuard: CanActivateFn = () => {
   const auth = inject(AuthService);
   const router = inject(Router);
   if (auth.isLoggedIn()) return true;
-  return auth.checkSession().pipe(map((ok) => (ok ? true : router.createUrlTree(['/auth/login']))));
+  return auth
+    .checkSession()
+    .pipe(
+      map((ok) => (ok ? true : router.createUrlTree(['/auth/login']))),
+      catchError(() => of(router.createUrlTree(['/auth/login'])))
+    );
 };
 
 export const guestGuard: CanActivateFn = () => {
   const auth = inject(AuthService);
   const router = inject(Router);
   if (auth.isLoggedIn()) return router.createUrlTree(['/timeline']);
-  return auth.checkSession().pipe(map((ok) => (ok ? router.createUrlTree(['/timeline']) : true)));
+  return auth
+    .checkSession()
+    .pipe(
+      map((ok) => (ok ? router.createUrlTree(['/timeline']) : true)),
+      catchError(() => of(true))
+    );
 };

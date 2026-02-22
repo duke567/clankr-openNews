@@ -15,3 +15,13 @@ export interface Post {
   content?: string;
   thumbnail?: string;
 }
+
+export interface SourceTweet {
+  id: number;
+  excluded: boolean;
+  author: string;
+  time: string;
+  text: string;
+  metrics?: { lk?: string; rt?: string; rp?: string };
+  media?: string[];
+}

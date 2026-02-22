@@ -42,15 +42,17 @@ export class LoginComponent {
   submit(): void {
     this.error = '';
     this.loading = true;
+    const username = this.username.trim();
+    const password = this.password;
 
-    this.api.login({ username: this.username, password: this.password }).subscribe({
+    this.api.login({ username, password }).subscribe({
       next: (res) => {
         if (!res.ok) {
           this.error = 'Login failed.';
           return;
         }
-        this.auth.markLoggedIn(res.user?.username || this.username);
-        this.router.navigateByUrl('/timeline');
+        this.auth.markLoggedIn(res.user?.username || username);
+        this.router.navigate(['/timeline']);
       },
       error: (err: HttpErrorResponse) => {
         const backendMessage = err.error?.message;

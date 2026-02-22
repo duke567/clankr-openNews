@@ -1,68 +1,32 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
-    />
-    {% load static %}
-    <link rel="stylesheet" href="{% static 'opensourcenewsapp/styles.css' %}" />
-    <title>Create Account</title>
-    <meta charset="UTF-8" />
-  </head>
+{% extends 'opensourcenewsapp/base.html' %}
 
-  <body>
-    <div class="container">
-      <div class="header">
-        <h2>Create Account</h2>
-      </div>
+{% block title %}Sign Up | OpenNews{% endblock %}
 
-      <form class="form" method="POST">
-        {% csrf_token %}
+{% block content %}
+<div class="card auth-card">
+  <h1>Create account</h1>
+  <form class="form" method="post">
+    {% csrf_token %}
 
-        <div class="form__control">
-          <label>Username</label>
-          <input
-            type="text"
-            name="username"
-            placeholder="Insert your user name..."
-            required
-          />
-        </div>
+    <label for="username">Username</label>
+    <input id="username" name="username" type="text" required />
 
+    <label for="password1">Password</label>
+    <input id="password1" name="password1" type="password" required />
 
-        <div class="form__control">
-          <label>Password</label>
-          <input
-            type="password"
-            name="password1"
-            placeholder="password..."
-            required
-          />
-        </div>
+    <label for="password2">Confirm password</label>
+    <input id="password2" name="password2" type="password" required />
 
-        <div class="form__control">
-          <label>Confirm Password</label>
-          <input
-            type="password"
-            name="password2"
-            placeholder="confirm password..."
-            required
-          />
-        </div>
-
-        {% if form.errors %}
-          <ul style="color: tomato;">
-            {% for field, errors in form.errors.items %}
-              {% for error in errors %}
-                <li>{{ error }}</li>
-              {% endfor %}
-            {% endfor %}
-          </ul>
-        {% endif %}
-
-        <button type="submit">Sign Up</button>
-      </form>
+    {% if form.errors %}
+    <div class="error-box">
+      {% for field, errors in form.errors.items %}
+        {% for error in errors %}<p>{{ error }}</p>{% endfor %}
+      {% endfor %}
     </div>
-  </body>
-</html>
+    {% endif %}
+
+    <button type="submit">Create account</button>
+  </form>
+  <p class="muted">Already have an account? <a href="{% url 'login' %}">Login</a></p>
+</div>
+{% endblock %}

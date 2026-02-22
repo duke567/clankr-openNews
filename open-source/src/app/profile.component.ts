@@ -5,8 +5,6 @@ import { ApiService } from './api.service';
 import { Post, User } from './models';
 import { PostCardComponent } from './post-card.component';
 
-const USE_CONTENT_API = false;
-
 @Component({
   selector: 'app-profile',
   standalone: true,
@@ -37,9 +35,7 @@ export class ProfileComponent implements OnInit {
     this.route.paramMap.subscribe((params) => {
       const username = params.get('username');
       if (!username) return;
-      this.user = { id: 0, username, display_name: username };
-      this.posts = [];
-      if (USE_CONTENT_API) this.load(username);
+      this.load(username);
     });
   }
 

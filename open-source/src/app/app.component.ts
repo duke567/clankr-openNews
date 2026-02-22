@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink, RouterOutlet } from '@angular/router';
+import { Router, RouterLink, RouterOutlet } from '@angular/router';
 import { AuthService } from './auth.service';
+import { TimelineRefreshService } from './timeline-refresh.service';
 
 @Component({
   selector: 'app-root',
@@ -9,9 +10,9 @@ import { AuthService } from './auth.service';
   imports: [CommonModule, RouterOutlet, RouterLink],
   template: `
     <header class="topbar">
-      <a routerLink="/timeline" class="brand">OpenNews</a>
+      <button type="button" class="brand nav-link-btn" (click)="goTimeline()">OpenNews</button>
       <nav class="nav">
-        <a routerLink="/timeline">Timeline</a>
+        <button type="button" class="nav-link-btn" (click)="goTimeline()">Timeline</button>
         <a *ngIf="auth.username" [routerLink]="['/u', auth.username]">Profile</a>
         <a *ngIf="!auth.isLoggedIn()" routerLink="/auth/login">Login</a>
         <a *ngIf="!auth.isLoggedIn()" routerLink="/auth/register">Register</a>
@@ -25,5 +26,25 @@ import { AuthService } from './auth.service';
   `
 })
 export class AppComponent {
-  constructor(public auth: AuthService) {}
+  authReady = false;
+
+  constructor(
+    public auth: AuthService,
+    private router: Router,
+    private timelineRefresh: TimelineRefreshService
+  ) {}
+
+  ngOnInit(): void {
+    this.auth.bootstrapSession().subscribe(() => {
+      this.authReady = true;
+    });
+  }
+
+  goTimeline(): void {
+    if (this.router.url.startsWith('/timeline')) {
+      this.timelineRefresh.trigger();
+      return;
+    }
+    this.router.navigate(['/timeline']);
+  }
 }

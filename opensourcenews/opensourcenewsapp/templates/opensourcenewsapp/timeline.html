@@ -1,0 +1,102 @@
+{% extends 'opensourcenewsapp/base.html' %}
+
+{% block title %}Timeline | OpenNews{% endblock %}
+
+{% block content %}
+<section class="page-head">
+  <h1>Happening Now</h1>
+  <p class="muted">Signed in as {{ username }}</p>
+</section>
+
+{% if notice %}<p class="ok-box">{{ notice }}</p>{% endif %}
+
+<section class="card controls-card">
+  <div class="section-head">
+    <h2>Scrape Controls</h2>
+    <p class="muted">Run scrape, summarize, and update timeline in one action.</p>
+  </div>
+  <form method="post" class="form scrape-form">
+    {% csrf_token %}
+    <div class="field-group">
+      <label for="query">Query</label>
+      <input id="query" name="query" value="{{ scrape_defaults.query }}" required />
+    </div>
+
+    <div class="field-group">
+      <label for="language">Language</label>
+      <select id="language" name="language">
+        <option value="en" {% if scrape_defaults.language == "en" %}selected{% endif %}>English (default)</option>
+        <option value="any" {% if scrape_defaults.language == "any" %}selected{% endif %}>Any language</option>
+        <option value="es" {% if scrape_defaults.language == "es" %}selected{% endif %}>Spanish</option>
+        <option value="fr" {% if scrape_defaults.language == "fr" %}selected{% endif %}>French</option>
+        <option value="de" {% if scrape_defaults.language == "de" %}selected{% endif %}>German</option>
+        <option value="pt" {% if scrape_defaults.language == "pt" %}selected{% endif %}>Portuguese</option>
+        <option value="ja" {% if scrape_defaults.language == "ja" %}selected{% endif %}>Japanese</option>
+        <option value="hi" {% if scrape_defaults.language == "hi" %}selected{% endif %}>Hindi</option>
+        <option value="ar" {% if scrape_defaults.language == "ar" %}selected{% endif %}>Arabic</option>
+        <option value="ko" {% if scrape_defaults.language == "ko" %}selected{% endif %}>Korean</option>
+        <option value="zh" {% if scrape_defaults.language == "zh" %}selected{% endif %}>Chinese</option>
+      </select>
+    </div>
+
+    <details class="advanced-box">
+      <summary>Advanced options</summary>
+      <div class="advanced-grid">
+        <label for="min_faves">Min favorites (optional)</label>
+        <input id="min_faves" name="min_faves" value="{{ scrape_defaults.min_faves }}" />
+
+        <label for="since">Since date YYYY-MM-DD (optional)</label>
+        <input id="since" name="since" value="{{ scrape_defaults.since }}" />
+
+        <label for="target_count">Target tweets</label>
+        <input id="target_count" name="target_count" value="{{ scrape_defaults.target_count }}" />
+
+        <label for="max_attempts">Scroll attempts</label>
+        <input id="max_attempts" name="max_attempts" value="{{ scrape_defaults.max_attempts }}" />
+
+        <label for="wait_selector_ms">Initial wait (ms)</label>
+        <input id="wait_selector_ms" name="wait_selector_ms" value="{{ scrape_defaults.wait_selector_ms }}" />
+
+        <label for="sleep_seconds">Sleep between scrolls (sec)</label>
+        <input id="sleep_seconds" name="sleep_seconds" value="{{ scrape_defaults.sleep_seconds }}" />
+      </div>
+    </details>
+
+    <button type="submit" class="btn-primary">Scrape + Generate + Refresh</button>
+  </form>
+  {% if scrape_result %}
+    {% if scrape_result.ok %}
+      <p class="ok-box">Done: scraped {{ scrape_result.scraped_count }} tweets, created {{ scrape_result.created_count }} posts.</p>
+    {% else %}
+      <div class="error-box">
+        <p>{{ scrape_result.message|default:scrape_result.error|default:"Scrape failed" }}</p>
+      </div>
+    {% endif %}
+  {% endif %}
+</section>
+
+{% if posts %}
+<section class="stack">
+  {% for post in posts %}
+  <article class="card post-card">
+    <h2><a href="{% url 'post_detail_page' post.id %}">{{ post.title|default:'Untitled summary' }}</a></h2>
+    {% if post.subtitle %}<p class="subtitle">{{ post.subtitle }}</p>{% endif %}
+    <p>{{ post.article|truncatechars:220 }}</p>
+    <div class="post-meta">
+      <div class="meta-actions">
+        <a class="link-cta" href="{% url 'post_detail_page' post.id %}">Open details</a>
+        <form method="post" action="{% url 'delete_post_summary' post.id %}" class="inline-form" onsubmit="return confirm('Delete this summary?');">
+          {% csrf_token %}
+          <button type="submit" class="btn-soft btn-danger">Delete summary</button>
+        </form>
+      </div>
+    </div>
+  </article>
+  {% endfor %}
+</section>
+{% else %}
+<div class="card">
+  <p>No posts yet. Run your scraper/ingest job, then refresh this page.</p>
+</div>
+{% endif %}
+{% endblock %}

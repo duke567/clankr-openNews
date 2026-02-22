@@ -13,6 +13,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from playwright.async_api import async_playwright, TimeoutError
 from rich.console import Console
 from rich.table import Table
+import requests
 
 app = FastAPI()
 console = Console()
@@ -23,6 +24,7 @@ X_CT0 = os.getenv("X_CT0", "fcca802079ed4ea4e4386d64471563d8e88fbd5a44c52011f8ab
 CACHE_TTL_SECONDS = 300
 TWEET_TARGET_COUNT = 40
 EXPORT_DIR = "exports"
+DJANGO_INGEST_URL = os.getenv("DJANGO_INGEST_URL", "http://127.0.0.1:8000/api/ingest-scrape/")
 
 if not os.path.exists(EXPORT_DIR):
     os.makedirs(EXPORT_DIR)
@@ -157,8 +159,35 @@ async def _execute_scrape(full_query: str) -> dict:
             await browser.close()
             raise e
 
+
+def _persist_export(data: dict) -> str:
+    filename = f"scrape_{int(time.time())}.json"
+    filepath = os.path.join(EXPORT_DIR, filename)
+    with open(filepath, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=4, ensure_ascii=False)
+    return filepath
+
+
+def _ingest_into_django(data: dict) -> dict:
+    try:
+        response = requests.post(DJANGO_INGEST_URL, json=data, timeout=60)
+        ok = response.status_code >= 200 and response.status_code < 300
+        body = None
+        try:
+            body = response.json()
+        except Exception:
+            body = response.text
+        return {"ok": ok, "status_code": response.status_code, "response": body}
+    except Exception as exc:
+        return {"ok": False, "error": str(exc), "status_code": 0}
+
 @app.get("/x/recent-search")
-async def recent_search(query: str = Query(...), min_faves: Optional[int] = None, since: Optional[str] = None, no_cache: bool = Query(False, description="Set to true to bypass the cache for this request")):
+async def recent_search(
+    query: str = Query(...),
+    min_faves: Optional[int] = None,
+    since: Optional[str] = None,
+    no_cache: bool = Query(False, description="Set to true to bypass the cache for this request"),
+):
     full_query = query
     if min_faves: full_query += f" min_faves:{min_faves}"
     if since: full_query += f" since:{since}"
@@ -177,10 +206,7 @@ async def recent_search(query: str = Query(...), min_faves: Optional[int] = None
         console.print(f"[red]Error:[/] {data['error']}")
         return data
 
-    filename = f"scrape_{int(time.time())}.json"
-    filepath = os.path.join(EXPORT_DIR, filename)
-    with open(filepath, "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=4, ensure_ascii=False)
+    _persist_export(data)
     
     render_terminal_table(full_query, data["results"])
     
@@ -188,3 +214,47 @@ async def recent_search(query: str = Query(...), min_faves: Optional[int] = None
         with _lock:
             _cache[full_query] = {"data": data, "expires_at": now + CACHE_TTL_SECONDS}
     return data
+
+
+@app.post("/x/scrape-and-ingest")
+async def scrape_and_ingest(
+    query: str = Query(...),
+    min_faves: Optional[int] = None,
+    since: Optional[str] = None,
+    no_cache: bool = Query(False),
+):
+    full_query = query
+    if min_faves:
+        full_query += f" min_faves:{min_faves}"
+    if since:
+        full_query += f" since:{since}"
+
+    now = time.time()
+    data = None
+    if not no_cache:
+        with _lock:
+            cached = _cache.get(full_query)
+            if cached and cached["expires_at"] > now:
+                data = cached["data"]
+
+    if data is None:
+        data = await _execute_scrape(full_query)
+        _persist_export(data)
+        render_terminal_table(full_query, data.get("results", []))
+        if not no_cache:
+            with _lock:
+                _cache[full_query] = {"data": data, "expires_at": now + CACHE_TTL_SECONDS}
+
+    ingest_result = _ingest_into_django(data)
+    status_code = 200 if ingest_result.get("ok") else 502
+    return Response(
+        content=json.dumps(
+            {
+                "query": full_query,
+                "scraped_count": data.get("count", 0),
+                "ingest": ingest_result,
+            }
+        ),
+        media_type="application/json",
+        status_code=status_code,
+    )

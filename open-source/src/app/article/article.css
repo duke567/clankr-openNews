@@ -1,0 +1,31 @@
+.tweet-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.tweet-list {
+  display: grid;
+  gap: 10px;
+}
+
+.tweet-item {
+  display: grid;
+  grid-template-columns: 22px 1fr;
+  gap: 10px;
+  padding: 10px;
+  border: 1px solid #3f3f46;
+  border-radius: 8px;
+  background: #1f1f25;
+}
+
+.tweet-head {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+}
+
+.tweet-item p {
+  margin: 6px 0;
+}

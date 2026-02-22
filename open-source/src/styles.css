@@ -42,8 +42,21 @@ a:hover {
   align-items: center;
 }
 
+.nav-link-btn {
+  background: none;
+  border: 0;
+  color: #ab6333;
+  cursor: pointer;
+  font: inherit;
+  padding: 0;
+}
+
+.nav-link-btn:hover {
+  text-decoration: underline;
+}
+
 .container {
-  max-width: 85%;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 16px;
 }
@@ -57,7 +70,12 @@ a:hover {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 8px;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.timeline-head {
+  align-items: center;
 }
 
 textarea,
@@ -125,13 +143,15 @@ label {
 }
 
 .section {
-  max-width: 40%;
+  flex: 1 1 320px;
+  min-width: 320px;
 }
 
-.section timeline {
+.section.timeline {
+  flex: 1.6 1 520px;
+  max-height: 75vh;
   overflow: hidden;
   overflow-y: auto;
-  max-height: 80%;
   padding-right: 8px;
 }
 
@@ -146,4 +166,15 @@ label {
 
 .section.timeline::-webkit-scrollbar-thumb:hover {
   background-color: #555;
+}
+
+@media (max-width: 900px) {
+  .section,
+  .section.timeline {
+    min-width: 100%;
+    flex: 1 1 100%;
+    max-height: none;
+    overflow: visible;
+    padding-right: 0;
+  }
 }

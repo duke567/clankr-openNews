@@ -8,7 +8,7 @@ import { Post } from './models';
   standalone: true,
   imports: [CommonModule, RouterLink],
   template: `
-    <a class="post-link" [routerLink]="['/posts', post.id]">
+    <a class="post-link" [routerLink]="['/posts', post.id]" [state]="{ post: post }">
       <article class="card post">
         <h2><b>{{ post.title }}</b></h2>
         <p>{{ post.subtitle }}</p>

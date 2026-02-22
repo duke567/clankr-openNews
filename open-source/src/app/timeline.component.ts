@@ -1,12 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ApiService } from './api.service';
 import { Post } from './models';
 import { PostCardComponent } from './post-card.component';
 import { SpotlightComponent } from './spotlight.component';
-import { MOCK_POSTS } from './mocks/posts';
-
-const USE_CONTENT_API = false;
+import { interval, Subject, takeUntil, timeout, catchError, of, finalize } from 'rxjs';
+import { TimelineRefreshService } from './timeline-refresh.service';
 
 @Component({
   selector: 'app-timeline',
@@ -21,56 +20,84 @@ const USE_CONTENT_API = false;
       </section>
 
       <section class="section timeline">
-        <h2>Happening Now</h2>
+        <div class="row timeline-head">
+          <h2>Happening Now</h2>
+          <button type="button" (click)="refresh()" [disabled]="loading">Refresh</button>
+        </div>
         <hr/>
 
         <p *ngIf="loading">Loading timeline...</p>
-        <p class="error" *ngIf="error">{{ Sorry! We can't fetch timeline right now. }}</p>
+        <p class="error" *ngIf="error">{{ error }}</p>
+        <p class="muted" *ngIf="!loading && !error && posts.length === 0">No posts in DB yet.</p>
 
         <app-post-card *ngFor="let post of posts" [post]="post"></app-post-card>
       </section>
     </div>
   `
 })
-export class TimelineComponent implements OnInit {
+export class TimelineComponent implements OnInit, OnDestroy {
   posts: Post[] = [];        // initialize empty
   loading = false;
   error = '';
+  private destroy$ = new Subject<void>();
+  private loadSeq = 0;
 
-  constructor(private api: ApiService) {}
+  constructor(private api: ApiService, private timelineRefresh: TimelineRefreshService) {}
 
   ngOnInit(): void {
-    if (USE_CONTENT_API) {
-      this.load();
-    } else {
-      // Use the shared mock array (no extra nesting)
-      this.posts = MOCK_POSTS.slice(); // defensive copy
-      this.loading = false;
-    }
+    this.load();
+    this.timelineRefresh.refresh$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => this.load(true));
+
+    interval(10000)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        if (!this.loading) this.load(false);
+      });
   }
 
-  load(): void {
-    this.loading = true;
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  load(showLoading = true): void {
+    const seq = ++this.loadSeq;
+    if (showLoading) this.loading = true;
     this.error = '';
-    this.api.getTimeline(50).subscribe({
+
+    // Hard safety: never leave the page in endless loading state.
+    setTimeout(() => {
+      if (this.loading && this.loadSeq === seq) {
+        this.loading = false;
+        this.error = 'Timeline request timed out. Try Refresh.';
+      }
+    }, 6000);
+
+    this.api.getTimeline(50).pipe(
+      timeout(5000),
+      catchError((err) => {
+        console.error('Timeline load error', err);
+        this.error = 'Unable to load timeline from backend.';
+        return of({ data: [] as Post[] });
+      }),
+      finalize(() => {
+        if (showLoading && this.loadSeq === seq) this.loading = false;
+      })
+    ).subscribe({
       next: (res) => {
         if (res?.data?.length) {
           this.posts = res.data;
         } else {
           this.posts = [];
         }
-      },
-      error: (err) => {
-        // Keep mock posts if backend is unavailable.
-        console.error('Timeline load error', err);
-        this.error = 'Unable to load timeline — showing local demo posts.';
-        this.posts = MOCK_POSTS.slice();
-        this.loading = false;
-      },
-      complete: () => {
-        this.loading = false;
       }
     });
+  }
+
+  refresh(): void {
+    this.load(true);
   }
 
   // trackBy helps ngFor perform better when list changes

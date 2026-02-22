@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, map, Observable, tap } from 'rxjs';
+import { BehaviorSubject, catchError, map, Observable, of, switchMap, tap } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -25,7 +25,10 @@ export class AuthService {
   }
 
   logout(): void {
-    // Local logout state only until backend logout is needed.
+    this.http
+      .get('/api/auth/csrf/', { responseType: 'text', withCredentials: true })
+      .pipe(switchMap(() => this.http.post('/api/auth/logout/', {}, { withCredentials: true })))
+      .subscribe({ error: () => void 0 });
     this.usernameSubject.next(null);
     this.loggedInSubject.next(false);
   }
@@ -40,5 +43,9 @@ export class AuthService {
         }),
         map((res) => res.authenticated)
       );
+  }
+
+  bootstrapSession(): Observable<boolean> {
+    return this.checkSession().pipe(catchError(() => of(false)));
   }
 }

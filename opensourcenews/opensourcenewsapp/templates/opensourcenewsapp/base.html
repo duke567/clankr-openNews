@@ -1,0 +1,28 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}OpenNews{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'opensourcenewsapp/styles.css' %}" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand"><a href="{% url 'timeline_page' %}">OpenNews</a></div>
+      <nav class="nav">
+        {% if request.user.is_authenticated %}
+        <a href="{% url 'timeline_page' %}">Timeline</a>
+        <a href="{% url 'logout_page' %}">Logout</a>
+        {% else %}
+        <a href="{% url 'login' %}">Login</a>
+        <a href="{% url 'signup' %}">Sign up</a>
+        {% endif %}
+      </nav>
+    </header>
+
+    <main class="page">
+      {% block content %}{% endblock %}
+    </main>
+  </body>
+</html>
