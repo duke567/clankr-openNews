@@ -5,8 +5,9 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login, logout
-from django.views.decorators.csrf import ensure_csrf_cookie
+from django.views.decorators.csrf import ensure_csrf_cookie, csrf_exempt
 from django.views.decorators.http import require_GET, require_POST
+from .event_engine import process_scrape
 
 
 def sign_up(request):
@@ -108,4 +109,14 @@ def api_auth_me(request):
 @require_POST
 def api_auth_logout(request):
     logout(request)
+    return JsonResponse({"ok": True})
+
+@csrf_exempt
+def ingest_scrape(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "POST required"}, status=405)
+
+    data = json.loads(request.body)
+    process_scrape(data)
+
     return JsonResponse({"ok": True})

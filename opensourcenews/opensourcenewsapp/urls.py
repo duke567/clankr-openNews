@@ -8,6 +8,7 @@ from .views import (
     sign_up,
     log_in,
     welcome,
+    ingest_scrape,
 )
 
 urlpatterns = [
@@ -19,4 +20,5 @@ urlpatterns = [
     path("api/auth/register/", api_auth_register, name="api_auth_register"),
     path("api/auth/me/", api_auth_me, name="api_auth_me"),
     path("api/auth/logout/", api_auth_logout, name="api_auth_logout"),
+    path("api/ingest-scrape/", ingest_scrape, name="ingest_scrape"),
 ]
