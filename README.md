@@ -1,3 +1,5 @@
+demo
+
 # OpenNews – HackED 2026 Project
 
 OpenNews is a prototype news aggregator built at **HackED 2026**—the University of Alberta’s 48‑hour student‑run hackathon held 20‑22 February 2026:contentReference[oaicite:0]{index=0}.  Our team wanted to explore whether generative AI could help citizens keep up with rapidly developing local events.  The result is a full‑stack demo that scrapes public posts from X (formerly Twitter), clusters them into real‑world events and generates concise articles summarising why they matter.
